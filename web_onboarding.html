@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新人入职知识图谱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans">
+    <nav class="bg-sky-700 text-white p-4 shadow-lg">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <h1 class="text-xl font-bold"><i class="fa fa-graduation-cap mr-2"></i>新人入职知识图谱</h1>
+            <div class="space-x-4 text-sm">
+                <button onclick="showTab('path')" class="tab-btn px-3 py-1 rounded bg-sky-500">学习路径</button>
+                <button onclick="showTab('plan')" class="tab-btn px-3 py-1 rounded hover:bg-sky-500"><i class="fa fa-calendar"></i> 30天计划</button>
+                <button onclick="showTab('progress')" class="tab-btn px-3 py-1 rounded hover:bg-sky-500"><i class="fa fa-check-circle"></i> 进度追踪</button>
+                <button onclick="showTab('mentor')" class="tab-btn px-3 py-1 rounded hover:bg-sky-500"><i class="fa fa-eye"></i> 导师视图</button>
+            </div>
+        </div>
+    </nav>
+    <div class="max-w-6xl mx-auto p-4">
+        <!-- 角色选择 -->
+        <div class="bg-white rounded-xl shadow p-4 mb-6">
+            <div class="flex flex-wrap items-center gap-4">
+                <span class="font-medium text-sm"><i class="fa fa-id-card mr-1 text-sky-600"></i>选择角色：</span>
+                <div class="flex flex-wrap gap-2" id="roleTabs"></div>
+            </div>
+        </div>
+
+        <!-- 学习路径Tab -->
+        <div id="tab-path" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div>
+                    <div class="bg-white rounded-xl shadow p-4">
+                        <h4 class="font-bold text-sm mb-3"><i class="fa fa-cubes mr-1 text-sky-600"></i>知识分类</h4>
+                        <div id="categoryList" class="space-y-1"></div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-4 mt-4">
+                        <h4 class="font-bold text-sm mb-2"><i class="fa fa-info-circle mr-1 text-sky-600"></i>完成进度</h4>
+                        <div class="w-full bg-gray-200 rounded-full h-3"><div class="bg-sky-600 h-3 rounded-full transition-all duration-500" style="width:0%"></div></div>
+                        <div class="text-xs text-gray-500 mt-1 text-right"><span id="progressPercent">0</span>%</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-4 mt-4">
+                        <h4 class="font-bold text-sm mb-2"><i class="fa fa-plus-circle mr-1 text-sky-600"></i>新增任务</h4>
+                        <div class="space-y-2">
+                            <input type="text" id="newTaskName" class="w-full border rounded p-1.5 text-xs" placeholder="任务名称">
+                            <input type="text" id="newTaskDesc" class="w-full border rounded p-1.5 text-xs" placeholder="任务描述">
+                            <input type="url" id="newTaskUrl" class="w-full border rounded p-1.5 text-xs" placeholder="学习资源URL（可选）">
+                            <select id="newTaskCategory" class="w-full border rounded p-1.5 text-xs"></select>
+                            <button onclick="addNewTask()" class="w-full bg-sky-600 text-white py-1.5 rounded text-xs hover:bg-sky-700"><i class="fa fa-plus mr-1"></i>添加到当前分类</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold"><i class="fa fa-th mr-2 text-sky-600"></i><span id="selectedCategory">知识节点</span></h3>
+                            <span class="text-xs text-gray-500"><span id="completedNodes">0</span>/<span id="totalNodes">0</span> 已完成</span>
+                        </div>
+                        <div id="knowledgeGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 30天学习计划Tab -->
+        <div id="tab-plan" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold"><i class="fa fa-calendar-check-o mr-2 text-sky-600"></i><span id="planRoleName">30天学习计划</span></h3>
+                            <button onclick="generatePlan()" class="bg-sky-600 text-white px-4 py-2 rounded text-sm hover:bg-sky-700"><i class="fa fa-refresh mr-1"></i>重新生成</button>
+                        </div>
+                        <div id="planGrid" class="space-y-2"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="bg-white rounded-xl shadow p-5">
+                        <h4 class="font-bold text-sm mb-3"><i class="fa fa-file-text-o mr-1 text-sky-600"></i>学习建议</h4>
+                        <div id="studyTips" class="text-sm text-gray-600 space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 进度追踪Tab -->
+        <div id="tab-progress" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h3 class="font-bold mb-4"><i class="fa fa-tasks mr-2 text-sky-600"></i>学习进度总览</h3>
+                    <div id="progressOverview" class="space-y-4"></div>
+                </div>
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h3 class="font-bold mb-4"><i class="fa fa-lightbulb-o mr-2 text-sky-600"></i>待学习知识点</h3>
+                    <div id="pendingList" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导师视图Tab -->
+        <div id="tab-mentor" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold"><i class="fa fa-eye mr-2 text-sky-600"></i>导师视图 - 新人学习进度</h3>
+                            <div class="flex gap-2">
+                                <button onclick="shareWithMentor()" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-xs hover:bg-indigo-700"><i class="fa fa-share mr-1"></i>生成分享链接</button>
+                                <button onclick="loadMentorData()" class="bg-emerald-600 text-white px-3 py-1.5 rounded text-xs hover:bg-emerald-700"><i class="fa fa-download mr-1"></i>加载导师数据</button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">导师可查看新人的学习进度，包括已完成任务、进度百分比和待学习知识点。</p>
+                        <div id="shareLinkContainer" class="hidden mb-4">
+                            <div class="flex gap-2">
+                                <input type="text" id="mentorShareLink" class="flex-1 border rounded p-2 text-xs text-gray-600" readonly>
+                                <button onclick="copyMentorLink()" class="bg-gray-200 text-gray-700 px-3 py-2 rounded text-xs hover:bg-gray-300"><i class="fa fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <div id="mentorProgressOverview" class="space-y-4">
+                            <div class="text-center text-gray-400 py-10"><i class="fa fa-eye text-4xl mb-3 block text-gray-300"></i><p>选择一种加载方式：</p><p class="text-xs mt-2">1. 点击「生成分享链接」复制后发给导师<br>2. 导师可点击「加载导师数据」从链接恢复查看</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white rounded-xl shadow p-5">
+                        <h4 class="font-bold text-sm mb-3"><i class="fa fa-bar-chart mr-1 text-sky-600"></i>导师统计</h4>
+                        <div id="mentorStats" class="space-y-2 text-sm"></div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-5">
+                        <h4 class="font-bold text-sm mb-3"><i class="fa fa-pencil mr-1 text-sky-600"></i>导师备注</h4>
+                        <textarea id="mentorNote" rows="4" class="w-full border rounded p-2 text-xs" placeholder="输入对新人学习情况的评价和建议..."></textarea>
+                        <button onclick="saveMentorNote()" class="w-full bg-amber-600 text-white py-1.5 rounded text-xs hover:bg-amber-700 mt-2"><i class="fa fa-save mr-1"></i>保存备注</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ROLES = {
+            '开发': { categories: [
+                { name: '开发环境', icon: 'fa-laptop', items: [{ id: 'dev_env', name: '开发环境搭建', deps: [], desc: 'IDE/Git/终端配置', resourceUrl: 'https://code.visualstudio.com/docs' }, { id: 'git_workflow', name: 'Git工作流', deps: ['dev_env'], desc: '分支管理/PR流程', resourceUrl: 'https://git-scm.com/book/zh/v2' }] },
+                { name: '基础技术', icon: 'fa-code', items: [{ id: 'lang_basic', name: '编程语言基础', deps: [], desc: '核心语法/常用API', resourceUrl: '' }, { id: 'data_struct', name: '数据结构与算法', deps: ['lang_basic'], desc: '数组/链表/树/排序', resourceUrl: '' }, { id: 'db_basic', name: '数据库基础', deps: [], desc: 'SQL/ORM基础', resourceUrl: '' }] },
+                { name: '框架与工具', icon: 'fa-cogs', items: [{ id: 'web_framework', name: 'Web框架', deps: ['lang_basic'], desc: '路由/中间件/API开发', resourceUrl: '' }, { id: 'test_framework', name: '测试框架', deps: ['web_framework'], desc: '单元测试/集成测试', resourceUrl: '' }, { id: 'ci_cd', name: 'CI/CD流程', deps: ['git_workflow'], desc: '自动构建/部署', resourceUrl: '' }] },
+                { name: '业务理解', icon: 'fa-briefcase', items: [{ id: 'product_doc', name: '产品文档阅读', deps: [], desc: 'PRD/技术方案理解', resourceUrl: '' }, { id: 'code_review', name: 'Code Review规范', deps: ['git_workflow'], desc: '代码审查流程和标准', resourceUrl: '' }] }
+            ]},
+            '产品': { categories: [
+                { name: '产品基础', icon: 'fa-book', items: [{ id: 'prod_thinking', name: '产品思维入门', deps: [], desc: '用户导向/MVP思维', resourceUrl: '' }, { id: 'user_research', name: '用户研究方法', deps: ['prod_thinking'], desc: '访谈/问卷/数据分析', resourceUrl: '' }] },
+                { name: '工具技能', icon: 'fa-pencil-square-o', items: [{ id: 'axure_figma', name: '原型设计工具', deps: [], desc: 'Axure/Figma基本操作', resourceUrl: '' }, { id: 'prd_write', name: 'PRD文档撰写', deps: ['axure_figma'], desc: '需求文档结构和规范', resourceUrl: '' }] },
+                { name: '数据分析', icon: 'fa-bar-chart', items: [{ id: 'data_analysis', name: '数据分析基础', deps: [], desc: 'SQL/Excel基础分析', resourceUrl: '' }, { id: 'a_b_test', name: 'A/B测试方法', deps: ['data_analysis'], desc: '实验设计和分析', resourceUrl: '' }] },
+                { name: '项目管理', icon: 'fa-tasks', items: [{ id: 'agile', name: '敏捷开发流程', deps: [], desc: 'Scrum/Kanban', resourceUrl: '' }, { id: 'req_mgmt', name: '需求管理', deps: ['prd_write'], desc: '需求优先级/排期', resourceUrl: '' }] }
+            ]},
+            '设计': { categories: [
+                { name: '设计工具', icon: 'fa-paint-brush', items: [{ id: 'figma_basic', name: 'Figma基础操作', deps: [], desc: '画板/组件/自动布局', resourceUrl: '' }, { id: 'design_system', name: '设计系统理解', deps: ['figma_basic'], desc: '组件库/样式规范', resourceUrl: '' }] },
+                { name: '设计原则', icon: 'fa-eye', items: [{ id: 'visual_design', name: '视觉设计原则', deps: [], desc: '排版/色彩/对比', resourceUrl: '' }, { id: 'ui_patterns', name: 'UI设计模式', deps: ['visual_design'], desc: '常见界面模式', resourceUrl: '' }, { id: 'accessibility', name: '无障碍设计', deps: ['ui_patterns'], desc: 'WCAG标准', resourceUrl: '' }] },
+                { name: '用户体验', icon: 'fa-users', items: [{ id: 'ux_research', name: '用户研究方法', deps: [], desc: '用户画像/旅程地图', resourceUrl: '' }, { id: 'prototype', name: '交互原型', deps: ['figma_basic'], desc: '动效/交互动画', resourceUrl: '' }, { id: 'usability_test', name: '可用性测试', deps: ['ux_research'], desc: '测试方法和工具', resourceUrl: '' }] },
+                { name: '协作流程', icon: 'fa-handshake-o', items: [{ id: 'design_handoff', name: '设计交付流程', deps: ['design_system'], desc: '切图/标注/规范文档', resourceUrl: '' }, { id: 'design_review', name: '设计审查流程', deps: ['design_handoff'], desc: '评审标准和反馈方法', resourceUrl: '' }] }
+            ]},
+            '运营': { categories: [
+                { name: '运营基础', icon: 'fa-rocket', items: [{ id: 'op_thinking', name: '运营思维入门', deps: [], desc: '用户生命周期/漏斗模型', resourceUrl: '' }, { id: 'content_op', name: '内容运营基础', deps: ['op_thinking'], desc: '内容规划/撰写/分发', resourceUrl: '' }] },
+                { name: '渠道工具', icon: 'fa-share-alt', items: [{ id: 'social_media', name: '社交媒体运营', deps: [], desc: '各平台规则和玩法', resourceUrl: '' }, { id: 'seo_basic', name: 'SEO基础', deps: ['content_op'], desc: '关键词/站内优化', resourceUrl: '' }, { id: 'email_mkt', name: '邮件营销', deps: [], desc: 'EDM策略和工具', resourceUrl: '' }] },
+                { name: '数据分析', icon: 'fa-line-chart', items: [{ id: 'op_data', name: '运营数据分析', deps: [], desc: '核心指标/数据工具', resourceUrl: '' }, { id: 'growth_model', name: '增长模型', deps: ['op_data'], desc: 'AARRR模型/北极星指标', resourceUrl: '' }] },
+                { name: '活动策划', icon: 'fa-calendar', items: [{ id: 'campaign', name: '活动策划执行', deps: ['op_thinking'], desc: '活动方案/执行SOP', resourceUrl: '' }, { id: 'community_op', name: '社群运营', deps: ['campaign'], desc: '社群搭建/活跃/转化', resourceUrl: '' }] }
+            ]},
+            '销售': { categories: [
+                { name: '产品认知', icon: 'fa-cube', items: [{ id: 'prod_knowledge', name: '产品知识培训', deps: [], desc: '产品功能/定价/竞品', resourceUrl: '' }, { id: 'industry_know', name: '行业知识', deps: ['prod_knowledge'], desc: '行业趋势/客户痛点', resourceUrl: '' }] },
+                { name: '销售技能', icon: 'fa-commenting', items: [{ id: 'sales_process', name: '销售流程', deps: [], desc: '线索/跟进/成交/售后', resourceUrl: '' }, { id: 'comm_skill', name: '沟通与谈判', deps: ['sales_process'], desc: 'SPIN/异议处理', resourceUrl: '' }, { id: 'demo_skill', name: '产品演示技巧', deps: ['prod_knowledge'], desc: 'Demo设计和演讲', resourceUrl: '' }] },
+                { name: '工具系统', icon: 'fa-desktop', items: [{ id: 'crm_usage', name: 'CRM系统使用', deps: [], desc: '客户管理/跟进记录', resourceUrl: '' }, { id: 'sales_tool', name: '销售工具链', deps: ['crm_usage'], desc: '邮件/日历/文档工具', resourceUrl: '' }] },
+                { name: '业绩管理', icon: 'fa-trophy', items: [{ id: 'pipeline_mgmt', name: '销售管道管理', deps: ['sales_process'], desc: '管道阶段/预测', resourceUrl: '' }, { id: 'quota_plan', name: '目标与计划', deps: ['pipeline_mgmt'], desc: '季度目标/行动计划', resourceUrl: '' }] }
+            ]}
+        };
+
+        let currentRole = '开发';
+        let completed = JSON.parse(localStorage.getItem('onboardingCompleted') || '{}');
+        let customItems = JSON.parse(localStorage.getItem('onboardingCustomItems') || '{}');
+
+        function save() { localStorage.setItem('onboardingCompleted', JSON.stringify(completed)); localStorage.setItem('onboardingCustomItems', JSON.stringify(customItems)); }
+
+        function showTab(name) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.className = 'tab-btn px-3 py-1 rounded hover:bg-sky-500');
+            document.getElementById('tab-' + name).classList.remove('hidden');
+            if (name === 'path') renderKnowledge();
+            if (name === 'plan') renderPlan();
+            if (name === 'progress') renderProgress();
+            if (name === 'mentor') renderMentorView();
+        }
+
+        function renderRoleTabs() {
+            const container = document.getElementById('roleTabs');
+            container.innerHTML = Object.keys(ROLES).map(role =>
+                `<button onclick="selectRole('${role}')" class="px-4 py-2 rounded-lg text-sm font-medium transition ${role === currentRole ? 'bg-sky-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-sky-100'}">
+                    <i class="fa ${getRoleIcon(role)} mr-1"></i>${role}
+                </button>`
+            ).join('');
+        }
+
+        function getRoleIcon(role) { const icons = { '开发': 'fa-code', '产品': 'fa-pencil-square-o', '设计': 'fa-paint-brush', '运营': 'fa-rocket', '销售': 'fa-line-chart' }; return icons[role] || 'fa-user'; }
+
+        function selectRole(role) { currentRole = role; renderRoleTabs(); renderKnowledge(); renderPlan(); renderProgress(); }
+
+        function renderKnowledge() {
+            const roleData = ROLES[currentRole];
+            const catList = document.getElementById('categoryList');
+            catList.innerHTML = roleData.categories.map(c =>
+                `<div onclick="selectCategory('${c.name}')" class="p-2 rounded cursor-pointer hover:bg-sky-50 text-sm flex items-center gap-2">
+                    <i class="fa ${c.icon} text-sky-600 w-4"></i>
+                    <span class="${c.name === (window.selectedCategory || roleData.categories[0].name) ? 'font-medium text-sky-700' : 'text-gray-600'}">${c.name}</span>
+                    <span class="ml-auto text-xs text-gray-400">${getCategoryProgress(c)}</span>
+                </div>`
+            ).join('');
+            if (!window.selectedCategory || !roleData.categories.find(c => c.name === window.selectedCategory)) window.selectedCategory = roleData.categories[0].name;
+            showCategory(window.selectedCategory);
+            updateProgress();
+        }
+
+        function getCategoryProgress(cat) { const total = cat.items.length; const done = cat.items.filter(item => completed[item.id]).length; return `${done}/${total}`; }
+
+        function selectCategory(name) { window.selectedCategory = name; renderKnowledge(); }
+
+        function showCategory(name) {
+            document.getElementById('selectedCategory').textContent = name;
+            const roleData = ROLES[currentRole];
+            const cat = roleData.categories.find(c => c.name === name);
+            if (!cat) return;
+            let items = [...cat.items];
+            const customKey = currentRole + '_' + name;
+            if (customItems[customKey]) {
+                const custom = customItems[customKey];
+                if (custom.deleted) items = items.filter(item => !custom.deleted.includes(item.id));
+                if (custom.added) custom.added.forEach(newItem => items.push({ ...newItem, isNew: true }));
+                if (custom.order && custom.order.length > 0) items = custom.order.map(id => items.find(i => i.id === id)).filter(Boolean);
+            }
+            const catSel = document.getElementById('newTaskCategory');
+            catSel.innerHTML = roleData.categories.map(c => `<option value="${c.name}" ${c.name === name ? 'selected' : ''}>${c.name}</option>`).join('');
+
+            const grid = document.getElementById('knowledgeGrid');
+            grid.innerHTML = items.map(item => {
+                const isCompleted = !!completed[item.id];
+                const hasDeps = item.deps.length > 0;
+                const depsDone = item.deps.every(d => !!completed[d]);
+                const canComplete = depsDone || !hasDeps;
+                const resourceHtml = item.resourceUrl ? `<a href="${item.resourceUrl}" target="_blank" class="text-xs text-blue-500 hover:underline mt-1 inline-block"><i class="fa fa-external-link mr-1"></i>学习资源</a>` : '';
+                return `<div class="task-card p-4 rounded-lg border ${isCompleted ? 'border-green-300 bg-green-50' : canComplete ? 'border-gray-200 bg-white hover:border-sky-300' : 'border-gray-200 bg-gray-100 opacity-60'}"
+                    draggable="true" ondragstart="dragStart(event, '${item.id}', '${name}')" ondragover="dragOver(event)" ondrop="dropItem(event, '${item.id}', '${name}')" data-item-id="${item.id}">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleComplete('${item.id}')" class="w-4 h-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500 cursor-pointer">
+                            <h4 class="font-medium text-sm task-name" ondblclick="editTaskName('${item.id}', '${name}')">${item.name}</h4>
+                        </div>
+                        <div class="flex items-center gap-1"><i class="fa fa-arrows text-gray-400 cursor-move drag-handle"></i><button onclick="deleteTask('${item.id}', '${name}')" class="text-red-400 hover:text-red-600 text-xs px-1"><i class="fa fa-trash"></i></button></div>
+                    </div>
+                    <p class="text-xs text-gray-500">${item.desc}</p>
+                    ${resourceHtml}
+                    ${hasDeps ? `<div class="mt-1 text-xs ${depsDone ? 'text-green-600' : 'text-orange-600'}"><i class="fa fa-link mr-1"></i>前置：${item.deps.map(d => findItemName(d)).join('、')}</div>` : ''}
+                </div>`;
+            }).join('');
+            document.getElementById('completedNodes').textContent = items.filter(i => completed[i.id]).length;
+            document.getElementById('totalNodes').textContent = items.length;
+        }
+
+        function findItemName(id) { for (const role of Object.values(ROLES)) for (const cat of role.categories) { const item = cat.items.find(i => i.id === id); if (item) return item.name; } return id; }
+
+        function toggleComplete(id) { completed[id] = !completed[id]; if (!completed[id]) delete completed[id]; save(); renderKnowledge(); renderPlan(); renderProgress(); }
+
+        function updateProgress() {
+            const roleData = ROLES[currentRole]; let total = 0, done = 0;
+            roleData.categories.forEach(c => c.items.forEach(item => { total++; if (completed[item.id]) done++; }));
+            const pct = total > 0 ? Math.round(done / total * 100) : 0;
+            const bar = document.querySelector('#progressBar div'); if (bar) bar.style.width = pct + '%';
+            document.getElementById('progressPercent').textContent = pct;
+        }
+
+        function renderPlan() { document.getElementById('planRoleName').textContent = `${currentRole} - 30天学习计划`; generatePlan(); }
+
+        function generatePlan() {
+            const roleData = ROLES[currentRole]; const allItems = [];
+            roleData.categories.forEach(c => c.items.forEach(item => allItems.push({ ...item, category: c.name })));
+            const sorted = []; const added = new Set();
+            while (sorted.length < allItems.length) { allItems.forEach(item => { if (added.has(item.id)) return; if (item.deps.every(d => added.has(d))) { sorted.push(item); added.add(item.id); } }); }
+            const planGrid = document.getElementById('planGrid');
+            const days = 30;
+            let html = '';
+            for (let d = 0; d < Math.min(days, sorted.length); d++) {
+                const item = sorted[d]; const isDone = !!completed[item.id];
+                const resourceHtml = item.resourceUrl ? ` <a href="${item.resourceUrl}" target="_blank" class="text-xs text-blue-500"><i class="fa fa-external-link"></i></a>` : '';
+                html += `<div class="flex items-center gap-3 p-2 ${isDone ? 'bg-green-50' : d % 2 === 0 ? 'bg-gray-50' : 'bg-white'} rounded">
+                    <div class="w-16 text-center text-sm font-medium text-gray-500">第${d + 1}天</div>
+                    <div class="w-6 h-6 rounded-full ${isDone ? 'bg-green-500 text-white' : 'border-2 border-gray-300'} flex items-center justify-center text-xs">${isDone ? '<i class="fa fa-check"></i>' : d + 1}</div>
+                    <div class="flex-1"><span class="text-sm ${isDone ? 'line-through text-gray-400' : ''}">${item.name}</span><span class="text-xs text-gray-400 ml-2">${item.category}</span>${resourceHtml}</div>
+                    <button onclick="toggleComplete('${item.id}')" class="text-xs ${isDone ? 'text-green-600' : 'text-gray-400 hover:text-sky-600'}">${isDone ? '已完成' : '标记完成'}</button>
+                </div>`;
+            }
+            if (sorted.length === 0) html = '<div class="text-center text-gray-400 py-8">暂无学习项目</div>';
+            planGrid.innerHTML = html;
+            const tips = document.getElementById('studyTips');
+            tips.innerHTML = `<div class="p-3 bg-sky-50 rounded"><i class="fa fa-clock-o mr-1 text-sky-600"></i>每天投入1-2小时，保持节奏</div><div class="p-3 bg-sky-50 rounded"><i class="fa fa-link mr-1 text-sky-600"></i>先完成前置知识，再学习进阶内容</div><div class="p-3 bg-sky-50 rounded"><i class="fa fa-external-link mr-1 text-sky-600"></i>善用学习资源链接，深入理解每个知识点</div><div class="p-3 bg-sky-50 rounded"><i class="fa fa-comments mr-1 text-sky-600"></i>遇到问题主动请教导师或同事</div><div class="p-3 bg-sky-50 rounded"><i class="fa fa-repeat mr-1 text-sky-600"></i>定期回顾已学内容，巩固知识</div>`;
+        }
+
+        function renderProgress() {
+            const roleData = ROLES[currentRole];
+            const overview = document.getElementById('progressOverview');
+            overview.innerHTML = roleData.categories.map(c => { const total = c.items.length; const done = c.items.filter(i => completed[i.id]).length; const pct = total > 0 ? Math.round(done / total * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span>${c.name}</span><span>${done}/${total} (${pct}%)</span></div><div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-sky-600 h-2 rounded-full" style="width:${pct}%"></div></div></div>`; }).join('');
+
+            const pending = document.getElementById('pendingList');
+            let pendingItems = [];
+            roleData.categories.forEach(c => c.items.forEach(item => { if (!completed[item.id]) { const depsDone = item.deps.every(d => !!completed[d]); pendingItems.push({ ...item, category: c.name, canStart: depsDone }); } }));
+            if (pendingItems.length === 0) { pending.innerHTML = '<div class="text-green-600 bg-green-50 p-4 rounded text-center"><i class="fa fa-trophy mr-1"></i>全部学习完成！</div>'; }
+            else {
+                pending.innerHTML = pendingItems.map(item => {
+                    const resourceHtml = item.resourceUrl ? ` <a href="${item.resourceUrl}" target="_blank" class="text-blue-500 text-xs"><i class="fa fa-external-link"></i></a>` : '';
+                    return `<div class="flex items-center gap-2 p-2 ${item.canStart ? 'bg-gray-50' : 'bg-orange-50'} rounded text-sm"><i class="fa ${item.canStart ? 'fa-circle-o text-gray-300' : 'fa-lock text-orange-400'}"></i><span class="${item.canStart ? '' : 'text-gray-400'}">${item.name}</span><span class="text-xs text-gray-400 ml-auto">${item.category}</span>${resourceHtml}</div>`;
+                }).join('');
+            }
+        }
+
+        // 拖拽排序
+        let dragItemId = null;
+        function dragStart(event, itemId, catName) { dragItemId = itemId; event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', itemId); event.target.classList.add('opacity-50'); }
+        function dragOver(event) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; event.currentTarget.classList.add('border-indigo-400', 'bg-indigo-50'); }
+        function dropItem(event, targetId, catName) {
+            event.preventDefault();
+            document.querySelectorAll('.task-card').forEach(c => { c.classList.remove('border-indigo-400', 'bg-indigo-50'); c.classList.remove('opacity-50'); });
+            if (!dragItemId || dragItemId === targetId) return;
+            const customKey = currentRole + '_' + catName;
+            if (!customItems[customKey]) customItems[customKey] = {};
+            const roleData = ROLES[currentRole]; const cat = roleData.categories.find(c => c.name === catName);
+            if (!cat) return;
+            let ids = cat.items.map(i => i.id);
+            if (customItems[customKey].added) customItems[customKey].added.forEach(a => ids.push(a.id));
+            if (customItems[customKey].deleted) ids = ids.filter(id => !customItems[customKey].deleted.includes(id));
+            const fromIdx = ids.indexOf(dragItemId); const toIdx = ids.indexOf(targetId);
+            if (fromIdx >= 0 && toIdx >= 0) { ids.splice(fromIdx, 1); ids.splice(toIdx, 0, dragItemId); customItems[customKey].order = ids; save(); renderKnowledge(); }
+            dragItemId = null;
+        }
+
+        function deleteTask(itemId, catName) { if (!confirm('确定删除该任务吗？')) return; const customKey = currentRole + '_' + catName; if (!customItems[customKey]) customItems[customKey] = {}; if (!customItems[customKey].deleted) customItems[customKey].deleted = []; if (!customItems[customKey].deleted.includes(itemId)) customItems[customKey].deleted.push(itemId); if (completed[itemId]) delete completed[itemId]; save(); renderKnowledge(); }
+
+        function editTaskName(itemId, catName) {
+            const taskCards = document.querySelectorAll('.task-card'); let nameEl = null;
+            for (const card of taskCards) { if (card.dataset.itemId === itemId) { nameEl = card.querySelector('.task-name'); break; } }
+            if (!nameEl) return;
+            const oldName = nameEl.textContent; const input = document.createElement('input');
+            input.type = 'text'; input.value = oldName; input.className = 'w-full border rounded px-1 py-0.5 text-sm focus:ring-2 focus:ring-sky-400 outline-none';
+            nameEl.replaceWith(input); input.focus(); input.select();
+            function finishEdit() {
+                const newName = input.value.trim() || oldName; const span = document.createElement('span');
+                span.className = 'font-medium text-sm task-name'; span.textContent = newName;
+                span.ondblclick = function() { editTaskName(itemId, catName); };
+                input.replaceWith(span);
+                const customKey = currentRole + '_' + catName;
+                if (customItems[customKey] && customItems[customKey].added) { const addedItem = customItems[customKey].added.find(a => a.id === itemId); if (addedItem) { addedItem.name = newName; save(); } }
+            }
+            input.addEventListener('blur', finishEdit);
+            input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); input.blur(); } if (e.key === 'Escape') { input.value = oldName; input.blur(); } });
+        }
+
+        function addNewTask() {
+            const name = document.getElementById('newTaskName').value.trim();
+            const desc = document.getElementById('newTaskDesc').value.trim();
+            const resourceUrl = document.getElementById('newTaskUrl').value.trim();
+            const catName = document.getElementById('newTaskCategory').value;
+            if (!name) { alert('请输入任务名称'); return; }
+            const customKey = currentRole + '_' + catName;
+            if (!customItems[customKey]) customItems[customKey] = {};
+            if (!customItems[customKey].added) customItems[customKey].added = [];
+            const newId = 'custom_' + Date.now();
+            customItems[customKey].added.push({ id: newId, name, desc: desc || name, deps: [], resourceUrl });
+            document.getElementById('newTaskName').value = ''; document.getElementById('newTaskDesc').value = ''; document.getElementById('newTaskUrl').value = '';
+            save(); renderKnowledge(); addToast('已添加任务: ' + name);
+        }
+
+        // ============================================================
+        // 导师视图
+        // ============================================================
+        function renderMentorView() {
+            const roleData = ROLES[currentRole];
+            let total = 0, done = 0;
+            roleData.categories.forEach(c => c.items.forEach(item => { total++; if (completed[item.id]) done++; }));
+            const pct = total > 0 ? Math.round(done / total * 100) : 0;
+
+            document.getElementById('mentorStats').innerHTML = `
+                <div class="flex justify-between"><span>角色</span><span class="font-bold">${currentRole}</span></div>
+                <div class="flex justify-between"><span>总任务数</span><span>${total}</span></div>
+                <div class="flex justify-between"><span>已完成</span><span class="text-green-600">${done}</span></div>
+                <div class="flex justify-between"><span>完成率</span><span class="font-bold ${pct >= 80 ? 'text-green-600' : pct >= 50 ? 'text-amber-600' : 'text-red-600'}">${pct}%</span></div>
+                <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-sky-600 h-2 rounded-full" style="width:${pct}%"></div></div>
+            `;
+
+            // 导师进度总览
+            const overview = document.getElementById('mentorProgressOverview');
+            overview.innerHTML = roleData.categories.map(c => {
+                const totalC = c.items.length; const doneC = c.items.filter(i => completed[i.id]).length; const pctC = totalC > 0 ? Math.round(doneC / totalC * 100) : 0;
+                return `<div class="p-3 bg-gray-50 rounded-lg"><div class="flex justify-between items-center mb-1"><span class="font-medium text-sm">${c.name}</span><span class="text-xs text-gray-500">${doneC}/${totalC}</span></div><div class="w-full bg-gray-200 rounded-full h-1.5"><div class="bg-sky-500 h-1.5 rounded-full" style="width:${pctC}%"></div></div><div class="text-xs text-gray-400 mt-1">${c.items.filter(i => !completed[i.id]).map(i => i.name).join('、') || '全部完成'}</div></div>`;
+            }).join('');
+
+            // 恢复导师备注
+            const savedNote = localStorage.getItem('mentorNote');
+            if (savedNote) document.getElementById('mentorNote').value = savedNote;
+        }
+
+        function shareWithMentor() {
+            const data = {
+                role: currentRole,
+                completed: completed,
+                roleData: ROLES[currentRole],
+                exportTime: new Date().toISOString()
+            };
+            try {
+                const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+                const url = window.location.origin + window.location.pathname + '?mentor=' + encoded;
+                document.getElementById('mentorShareLink').value = url;
+                document.getElementById('shareLinkContainer').classList.remove('hidden');
+                addToast('分享链接已生成，可复制后发给导师');
+            } catch(e) { alert('数据编码失败'); }
+        }
+
+        function copyMentorLink() {
+            const input = document.getElementById('mentorShareLink');
+            if (!input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => addToast('链接已复制')).catch(() => { input.select(); document.execCommand('copy'); addToast('链接已复制'); });
+        }
+
+        function loadMentorData() {
+            const params = new URLSearchParams(window.location.search);
+            const dataParam = params.get('mentor');
+            if (!dataParam) { addToast('未检测到导师数据链接'); return; }
+            try {
+                const json = decodeURIComponent(atob(dataParam));
+                const data = JSON.parse(json);
+                if (data.role && data.completed) {
+                    currentRole = data.role;
+                    completed = data.completed;
+                    save();
+                    renderRoleTabs();
+                    renderKnowledge();
+                    renderMentorView();
+                    addToast(`已加载导师数据：${data.role}角色，完成度${Object.keys(data.completed).length}个任务`);
+                }
+            } catch(e) { addToast('数据加载失败：' + e.message); }
+        }
+
+        function saveMentorNote() {
+            const note = document.getElementById('mentorNote').value;
+            localStorage.setItem('mentorNote', note);
+            addToast('备注已保存');
+        }
+
+        function addToast(msg) {
+            const el = document.createElement('div');
+            el.className = 'fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-lg shadow-lg text-sm z-50';
+            el.textContent = msg; document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2500);
+        }
+
+        renderRoleTabs(); renderKnowledge();
+    </script>
+</body>
+</html>

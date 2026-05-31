@@ -1,0 +1,91 @@
+{
+  "name": "后端工程师入职知识图谱",
+  "description": "后端工程师入职所需掌握的知识体系",
+  "nodes": [
+    {"id": "company-intro", "name": "公司介绍", "type": "onboarding", "difficulty": 1, "estimated_hours": 2, "description": "了解公司历史、文化和组织架构"},
+    {"id": "team-intro", "name": "团队介绍", "type": "onboarding", "difficulty": 1, "estimated_hours": 1, "description": "认识团队成员和分工"},
+    {"id": "tool-setup", "name": "开发环境配置", "type": "tool", "difficulty": 1, "estimated_hours": 4, "description": "配置开发所需的各种工具和权限"},
+    {"id": "git-basics", "name": "Git基础", "type": "tool", "difficulty": 1, "estimated_hours": 4, "description": "版本控制的基本操作和工作流"},
+    {"id": "python-basics", "name": "Python基础", "type": "language", "difficulty": 1, "estimated_hours": 20, "description": "Python语言基础语法和特性"},
+    {"id": "python-advanced", "name": "Python进阶", "type": "language", "difficulty": 3, "estimated_hours": 30, "description": "装饰器、生成器、异步编程等进阶特性"},
+    {"id": "database-basics", "name": "数据库基础", "type": "database", "difficulty": 2, "estimated_hours": 15, "description": "SQL语言、数据库设计和基本操作"},
+    {"id": "mysql-deep", "name": "MySQL深入", "type": "database", "difficulty": 3, "estimated_hours": 25, "description": "索引优化、事务、锁机制、性能调优"},
+    {"id": "redis", "name": "Redis缓存", "type": "database", "difficulty": 3, "estimated_hours": 15, "description": "缓存策略、数据结构、集群部署"},
+    {"id": "rest-api", "name": "RESTful API设计", "type": "backend", "difficulty": 2, "estimated_hours": 10, "description": "API设计规范和最佳实践"},
+    {"id": "flask-framework", "name": "Flask框架", "type": "backend", "difficulty": 2, "estimated_hours": 15, "description": "Flask Web框架的核心概念和使用"},
+    {"id": "microservice", "name": "微服务架构", "type": "architecture", "difficulty": 4, "estimated_hours": 30, "description": "微服务的设计原则、服务拆分和通信"},
+    {"id": "docker", "name": "Docker容器化", "type": "tool", "difficulty": 3, "estimated_hours": 15, "description": "容器化部署和Docker编排"},
+    {"id": "message-queue", "name": "消息队列", "type": "architecture", "difficulty": 3, "estimated_hours": 12, "description": "RabbitMQ/Kafka的使用和场景"},
+    {"id": "testing", "name": "测试体系", "type": "backend", "difficulty": 2, "estimated_hours": 12, "description": "单元测试、集成测试和TDD"},
+    {"id": "ci-cd", "name": "CI/CD流水线", "type": "devops", "difficulty": 3, "estimated_hours": 10, "description": "持续集成和持续部署"},
+    {"id": "monitoring", "name": "监控告警", "type": "devops", "difficulty": 3, "estimated_hours": 8, "description": "服务监控、日志收集和告警体系"},
+    {"id": "code-review", "name": "Code Review规范", "type": "process", "difficulty": 1, "estimated_hours": 3, "description": "代码审查的标准和流程"},
+    {"id": "project-process", "name": "项目协作流程", "type": "process", "difficulty": 1, "estimated_hours": 3, "description": "需求评审、迭代计划、复盘等流程"},
+    {"id": "security", "name": "安全基础", "type": "backend", "difficulty": 2, "estimated_hours": 8, "description": "常见Web安全问题和防护措施"}
+  ],
+  "edges": [
+    {"from": "company-intro", "to": "team-intro", "type": "sequence"},
+    {"from": "team-intro", "to": "tool-setup", "type": "sequence"},
+    {"from": "tool-setup", "to": "git-basics", "type": "sequence"},
+    {"from": "tool-setup", "to": "python-basics", "type": "parallel"},
+    {"from": "python-basics", "to": "python-advanced", "type": "prerequisite"},
+    {"from": "python-basics", "to": "flask-framework", "type": "prerequisite"},
+    {"from": "python-advanced", "to": "microservice", "type": "prerequisite"},
+    {"from": "database-basics", "to": "mysql-deep", "type": "prerequisite"},
+    {"from": "database-basics", "to": "rest-api", "type": "prerequisite"},
+    {"from": "flask-framework", "to": "rest-api", "type": "prerequisite"},
+    {"from": "rest-api", "to": "testing", "type": "prerequisite"},
+    {"from": "mysql-deep", "to": "message-queue", "type": "related"},
+    {"from": "docker", "to": "microservice", "type": "prerequisite"},
+    {"from": "testing", "to": "ci-cd", "type": "prerequisite"},
+    {"from": "ci-cd", "to": "monitoring", "type": "sequence"},
+    {"from": "code-review", "to": "project-process", "type": "sequence"},
+    {"from": "python-basics", "to": "security", "type": "related"}
+  ],
+  "roles": [
+    {
+      "role": "后端工程师",
+      "required": [
+        "team-intro", "tool-setup", "git-basics", "python-basics",
+        "database-basics", "rest-api", "flask-framework",
+        "testing", "code-review", "project-process"
+      ],
+      "optional": [
+        "python-advanced", "mysql-deep", "redis", "docker",
+        "microservice", "message-queue", "ci-cd", "monitoring", "security"
+      ]
+    },
+    {
+      "role": "高级后端工程师",
+      "required": [
+        "team-intro", "tool-setup", "git-basics", "python-basics", "python-advanced",
+        "database-basics", "mysql-deep", "rest-api", "flask-framework",
+        "redis", "testing", "microservice", "docker",
+        "message-queue", "ci-cd", "monitoring", "code-review", "project-process"
+      ],
+      "optional": ["security"]
+    }
+  ],
+  "weekly_plans": [
+    {
+      "week": 1,
+      "focus": "入职适应和环境配置",
+      "estimated_hours": 20
+    },
+    {
+      "week": 2,
+      "focus": "基础技能夯实",
+      "estimated_hours": 25
+    },
+    {
+      "week": 3,
+      "focus": "框架和API开发",
+      "estimated_hours": 25
+    },
+    {
+      "week": 4,
+      "focus": "数据库和存储",
+      "estimated_hours": 20
+    }
+  ]
+}
