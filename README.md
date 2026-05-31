@@ -1,106 +1,17 @@
 # 新人入职知识图谱
 
-为新人构建系统化的学习知识图谱，生成个性化学习路径。
+新人入职两周还在问"这个在哪"？
+**知识图谱帮新人快速上手。**
 
-## 项目简介
+[![HTML](https://img.shields.io/badge/打开即用-无需安装-orange)]()
 
-新员工入职后面对海量信息往往无从下手。本工具通过构建知识图谱的方式，将公司的知识体系结构化呈现，并根据新人的角色和背景生成个性化的学习路径，让入职过程更加高效和系统。
+## 新人不再"迷茫"
 
-## 核心功能
+- **节点资源**：每个节点关联资源URL，直接访问
+- **导师视图**：Base64分享入职路线，导师一键下发
+- **拖拽排序**：自定义学习路径，适配个人节奏
+- **多角色**：5个角色×4个分类，覆盖常见岗位
 
-- **知识图谱构建**：解析文档和资料，构建知识点之间的关系网络
-- **学习路径生成**：根据角色和目标生成个性化学习路径
-- **前置依赖管理**：自动识别学习前需要掌握的前置知识
-- **进度追踪**：记录学习进度，调整学习计划
-- **可视化**：直观展示知识结构和学习路径
+## 怎么用
 
-## 技术架构
-
-```
-新人入职知识图谱/
-├── mapper.py            # 知识图谱构建框架
-├── path_generator.py    # 学习路径生成
-├── data/
-│   └── sample.json      # 示例知识数据
-├── requirements.txt
-└── README.md
-```
-
-## 快速开始
-
-### 安装依赖
-
-```bash
-pip install -r requirements.txt
-```
-
-### 构建知识图谱
-
-```python
-from mapper import KnowledgeMapper
-
-mapper = KnowledgeMapper()
-mapper.load_data("data/sample.json")
-graph = mapper.build_graph()
-
-print(f"节点数: {len(graph['nodes'])}")
-print(f"关系数: {len(graph['edges'])}")
-```
-
-### 生成学习路径
-
-```python
-from path_generator import LearningPathGenerator
-
-generator = LearningPathGenerator(graph)
-path = generator.generate_path(
-    role="后端工程师",
-    target_knowledge=["微服务架构", "Docker"],
-    existing_knowledge=["Python基础", "Git"]
-)
-
-for step in path:
-    print(f"{step['order']}. {step['name']} - {step['estimated_hours']}小时")
-```
-
-## 数据格式
-
-```json
-{
-  "nodes": [
-    {
-      "id": "python-basics",
-      "name": "Python基础",
-      "type": "language",
-      "difficulty": 1,
-      "estimated_hours": 20
-    }
-  ],
-  "edges": [
-    {
-      "from": "python-basics",
-      "to": "python-advanced",
-      "type": "prerequisite"
-    }
-  ],
-  "roles": [
-    {
-      "role": "后端工程师",
-      "required": ["微服务架构", "Docker"],
-      "optional": ["Kubernetes"]
-    }
-  ]
-}
-```
-
-## 学习方法建议
-
-| 学习阶段 | 方法 | 时间占比 |
-|----------|------|----------|
-| 认知建立 | 阅读文档 + 视频教程 | 20% |
-| 实践操作 | 动手实操 + 练习项目 | 50% |
-| 深度理解 | 参与真实项目 + code review | 30% |
-
-## 许可证
-
-MIT License
+打开 `web_onboarding.html` → 选择角色 → 查看学习路径
